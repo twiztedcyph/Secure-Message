@@ -149,6 +149,11 @@ public class Message
         this._messageContent = messageContent;
     }
 
+    public void setContext(Context context)
+    {
+        this.context = context;
+    }
+
     @Override
     public String toString()
     {

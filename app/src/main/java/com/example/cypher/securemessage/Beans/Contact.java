@@ -134,14 +134,15 @@ public class Contact
         return contactArray;
     }
 
-    public void deleteContact(int contactID)
+    public void deleteContact()
     {
         DbCon dbCon = new DbCon(context, null);
         SQLiteDatabase con = dbCon.getWritableDatabase();
+
         String delStatement = "DELETE FROM " +
                 DbCon.TABLE_CONTACTS + " WHERE " +
                 DbCon.COLUMN_ID + " = " +
-                contactID + ";";
+                this._id + ";";
 
         con.execSQL(delStatement);
         con.close();
@@ -176,6 +177,11 @@ public class Contact
     public void set_key(byte[] _key)
     {
         this._key = _key;
+    }
+
+    public void setContext(Context context)
+    {
+        this.context = context;
     }
 
     @Override

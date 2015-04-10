@@ -8,7 +8,7 @@ import android.util.Log;
 public class DbCon extends SQLiteOpenHelper
 {
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "secmsg.db";
+    private static final String DATABASE_NAME = "securemessage.db";
 
     public static final String TABLE_ME = "me";
     public static final String COLUMN_MY_ID = "_id";
@@ -27,7 +27,7 @@ public class DbCon extends SQLiteOpenHelper
     public static final String COLUMN_MESSAGE = "message";
     public static final String COLUMN_TIMESTAMP = "date_time";
 
-    public final String TAG = "com.twizted.secmsg";
+    public final String TAG = "securemessage";
 
     public DbCon(Context context, SQLiteDatabase.CursorFactory factory)
     {

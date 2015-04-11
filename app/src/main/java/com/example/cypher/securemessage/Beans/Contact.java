@@ -44,7 +44,6 @@ public class Contact
         contentValues.put(DbCon.COLUMN_USERNAME, this._username);
         contentValues.put(DbCon.COLUMN_KEY, this._key);
 
-
         con.insert(DbCon.TABLE_CONTACTS, null, contentValues);
         con.close();
         dbCon.close();

@@ -21,10 +21,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.cypher.securemessage.Beans.Contact;
+import com.example.cypher.securemessage.Beans.Message;
 import com.example.cypher.securemessage.Manager.NetManager;
 import com.example.cypher.securemessage.Misc.Encrypter;
 import com.example.cypher.securemessage.R;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 
@@ -56,6 +59,10 @@ public class MainActivity extends ActionBarActivity
             //First run of the app.
             firstRun();
         }
+
+        Intent serviceIntent = new Intent(this, MessageChecker.class);
+        startService(serviceIntent);
+
         meDisplay.setText(prefs.getString("username", ""));
 
         refreshList();

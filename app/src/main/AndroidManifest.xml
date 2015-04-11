@@ -25,8 +25,14 @@
         <activity
             android:name=".Activities.ViewMessagesActivity"
             android:label="@string/title_activity_view_messages"
-            android:windowSoftInputMode="stateHidden">
+            android:windowSoftInputMode="stateHidden" >
         </activity>
+
+        <service
+            android:name=".Activities.MessageChecker"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>

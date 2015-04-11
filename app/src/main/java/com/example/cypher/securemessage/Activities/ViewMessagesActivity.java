@@ -1,6 +1,8 @@
 package com.example.cypher.securemessage.Activities;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -17,6 +19,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.cypher.securemessage.Beans.Message;
@@ -35,6 +38,8 @@ import java.security.cert.CertificateException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.sql.Timestamp;
+import java.util.Date;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -49,12 +54,22 @@ public class ViewMessagesActivity extends ActionBarActivity
     private String contactName, myName;
     private int contactID;
     private byte[] contactKey;
+    private BroadcastReceiver receiver;
     
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_messages);
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String s = intent.getStringExtra(NetManager.RESULT);
+                refreshList();
+            }
+        };
+
         encrypter = new Encrypter();
         Bundle extras = getIntent().getExtras();
 
@@ -66,6 +81,12 @@ public class ViewMessagesActivity extends ActionBarActivity
             myName = extras.getString("myusername");
 
         }
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
 
         if (contactID > 0)
         {
@@ -88,7 +109,7 @@ public class ViewMessagesActivity extends ActionBarActivity
             });
         }
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -116,7 +137,8 @@ public class ViewMessagesActivity extends ActionBarActivity
 
     private void refreshList()
     {
-        customListAdapter = new CustomMessageAdapter(this, new Message(this).getAll(contactID));
+        Message[] all = new Message(this).getAll(contactID);
+        customListAdapter = new CustomMessageAdapter(this, all);
         messageListView = (ListView) findViewById(R.id.messageListView);
         messageListView.setAdapter(customListAdapter);
     }
@@ -133,13 +155,19 @@ public class ViewMessagesActivity extends ActionBarActivity
                 X509EncodedKeySpec keySpec = new X509EncodedKeySpec(contactKey);
                 RSAPublicKey recipPublicKey = (RSAPublicKey) keyFactory.generatePublic(keySpec);
 
-                String[] message = {myName, encrypter.encrypt(messageText, recipPublicKey), contactName};
+                String[] message = {myName, encrypter.encrypt(messageText, recipPublicKey), contactName, String.valueOf(contactID)};
+                Message msg = new Message(this);
+                msg.set_fromME(true);
+                msg.set_contactID(contactID);
+                msg.set_messageContent(encrypter.encrypt(messageText, encrypter.getMyPubKey()));
+                msg.set_timeStamp(new Timestamp(new Date().getTime()).toString());
+                msg.persist();
+
                 NetManager netManager = new NetManager(this);
+                messageInput.setText("");
                 netManager.sendMessage(message);
-            } catch (InvalidKeySpecException | NoSuchAlgorithmException |
-                    IllegalBlockSizeException | InvalidKeyException |
-                    NoSuchProviderException | NoSuchPaddingException |
-                    BadPaddingException e)
+                refreshList();
+            } catch (InvalidKeySpecException | NoSuchAlgorithmException | IllegalBlockSizeException | InvalidKeyException | NoSuchProviderException | NoSuchPaddingException | BadPaddingException | IOException | KeyStoreException | UnrecoverableEntryException | CertificateException e)
             {
                 e.printStackTrace();
             }
@@ -170,15 +198,12 @@ public class ViewMessagesActivity extends ActionBarActivity
             if (m.is_fromME())
             {
                 customContactView.setBackgroundColor(Color.parseColor("#00FFCC"));
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                params.weight = 1.0f;
-                params.gravity = Gravity.RIGHT;
-                nameDisplay.setLayoutParams(params);
+
                 nameDisplay.setText("Me");
 
                 try
                 {
-                    messageDisplay.setLayoutParams(params);
+
                     messageDisplay.setText(encrypter.decrypt(m.get_messageContent(), encrypter.getMyPrivKey()));
                 } catch (NoSuchAlgorithmException | NoSuchPaddingException |
                         InvalidKeyException | IllegalBlockSizeException |

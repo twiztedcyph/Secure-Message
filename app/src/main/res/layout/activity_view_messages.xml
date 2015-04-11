@@ -14,7 +14,9 @@
         android:id="@+id/messageListView"
         android:layout_above="@+id/messageSendButton"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="50dp"/>
+        android:layout_marginBottom="50dp"
+        android:stackFromBottom="false"
+        android:layout_alignParentTop="true"/>
 
     <EditText
         android:layout_width="250dp"

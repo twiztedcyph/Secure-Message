@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.cypher.securemessage.Misc.DbCon;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 public class Message
@@ -40,18 +41,25 @@ public class Message
 
     public void persist()
     {
-        DbCon dbCon = new DbCon(context, null);
-        SQLiteDatabase con = dbCon.getWritableDatabase();
+        try
+        {
+            System.out.println("SAVING MESSAGE");
+            DbCon dbCon = new DbCon(context, null);
+            SQLiteDatabase con = dbCon.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(DbCon.COLUMN_CONTACT_ID, this._id);
-        values.put(DbCon.COLUMN_FROM_ME, (_fromME) ? 1 : 0);
-        values.put(DbCon.COLUMN_MESSAGE, this._messageContent);
-        values.put(DbCon.COLUMN_TIMESTAMP, this._timeStamp);
+            ContentValues values = new ContentValues();
+            values.put(DbCon.COLUMN_CONTACT_ID, _contactID);
+            values.put(DbCon.COLUMN_FROM_ME, (_fromME) ? 1 : 0);
+            values.put(DbCon.COLUMN_MESSAGE, this._messageContent);
+            values.put(DbCon.COLUMN_TIMESTAMP, this._timeStamp);
 
-        con.insert(DbCon.TABLE_MESSAGES, null, values);
-        con.close();
-        dbCon.close();
+            con.insert(DbCon.TABLE_MESSAGES, null, values);
+            con.close();
+            dbCon.close();
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public Message[] getAll(int _contactID)
@@ -60,9 +68,7 @@ public class Message
         DbCon dbCon = new DbCon(context, null);
         SQLiteDatabase con = dbCon.getWritableDatabase();
 
-        String query = "SELECT * FROM " + DbCon.TABLE_MESSAGES +
-                " WHERE " + DbCon.COLUMN_CONTACT_ID + " = " +
-                _contactID + ";";
+        String query = "SELECT * FROM " + DbCon.TABLE_MESSAGES + " WHERE " + DbCon.COLUMN_CONTACT_ID + " = " + _contactID + ";";
 
         Cursor cursor = con.rawQuery(query, null);
         cursor.moveToFirst();
@@ -78,6 +84,7 @@ public class Message
             cursor.moveToNext();
         }
         con.close();
+        cursor.close();
         dbCon.close();
 
         Message results[] = new Message[resultsArrayList.size()];
